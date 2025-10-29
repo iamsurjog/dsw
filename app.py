@@ -144,7 +144,7 @@ def book_venue():
             
             return redirect('/student/dashboard')
         
-        return render_template('/book_venue', error=True)
+        return render_template('book_venue.html', error=True)
 
     conn = get_db_connection()
     venues = conn.execute('SELECT name FROM venues').fetchall()
