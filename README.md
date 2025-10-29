@@ -2,7 +2,7 @@
 ## Installation
 To download the repo run
 ```bash
- git clone https://github.com/iamsurjog/dsw_be.git
+ git clone https://github.com/iamsurjog/dsw.git
  py -m venv ./.venv
  pip install -r requirements.txt
 ```
@@ -11,12 +11,12 @@ To download the repo run
 ### Windows
 ```bash
 .\.venv\Scripts\activate
-fastapi run main.py
+flask --app app run
 ```
 
 ### Linux
 ```bash
 source .venv/bin/activate
-fastapi run main.py
+flask --app app run
 ```
 
