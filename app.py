@@ -43,6 +43,32 @@ def login():
         
     return render_template("login.html")
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        user_type = request.form['user_type']
+        username = request.form['username']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        if password != confirm_password:
+            return "Passwords do not match", 400
+
+        conn = get_db_connection()
+        if user_type == 'student':
+            conn.execute('INSERT INTO CCs (name, password) VALUES (?, ?)', (username, hashlib.sha256(password.encode()).hexdigest()))
+        elif user_type == 'faculty':
+            conn.execute('INSERT INTO Faculty (name, password) VALUES (?, ?)', (username, hashlib.sha256(password.encode()).hexdigest()))
+        else:
+            return "Invalid user type", 400
+        
+        conn.commit()
+        conn.close()
+
+        return redirect('/login')
+
+    return render_template("register.html")
+
 @app.route('/student/dashboard')
 def student_dashboard():
     if 'user' not in session or session.get('user_type') != 'student':
@@ -79,18 +105,17 @@ def venue_availability():
         conn = get_db_connection()
         
         query = '''
-            SELECT * FROM venues 
+            SELECT * FROM venues
             WHERE name NOT IN (
                 SELECT Venue FROM Bookings
                 WHERE (
-                    (Start_Date < ? AND End_Date > ?) OR
-                    (Start_Date = ? AND Start_Time < ?) OR
-                    (End_Date = ? AND End_Time > ?)
+                    (Start_Date <= ? AND End_Date >= ?) AND
+                    (Start_Time <= ? AND End_Time >= ?)
                 )
             )
         '''
 
-        params = [end_date, start_date, start_date, end_time, end_date, start_time]
+        params = [end_date, start_date, end_time, start_time]
 
         if venue != 'all':
             query += ' AND name = ?'
@@ -117,34 +142,32 @@ def book_venue():
         event_name = request.form['event_name']
         
         conn = get_db_connection()
-        query = '''
-            SELECT * FROM venues 
-            WHERE name NOT IN (
-                SELECT Venue FROM Bookings
-                WHERE (
-                    (Start_Date < ? AND End_Date > ?) OR
-                    (Start_Date = ? AND Start_Time < ?) OR
-                    (End_Date = ? AND End_Time > ?)
-                )
+
+        # Check for conflicting bookings
+        conflict_query = '''
+            SELECT * FROM Bookings
+            WHERE Venue = ? AND (
+                (Start_Date <= ? AND End_Date >= ?) AND
+                (Start_Time <= ? AND End_Time >= ?)
             )
         '''
+        conflicting_bookings = conn.execute(conflict_query, (venue, end_date, start_date, end_time, start_time)).fetchall()
 
-        params = [end_date, start_date, start_date, end_time, end_date, start_time]
-
-        if venue != 'all':
-            query += ' AND name = ?'
-            params.append(venue)
-            
-        available_venues = conn.execute(query, tuple(params)).fetchall()
-        if len(available_venues) == 0:
+        if len(conflicting_bookings) == 0:
+            # No conflicting bookings, so insert the new booking
             conn.execute('INSERT INTO Bookings (Venue, Start_Time, Start_Date, End_Time, End_Date, Name, Status, Event_Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                          (venue, start_time, start_date, end_time, end_date, session['user'], 'pending', event_name))
             conn.commit()
             conn.close()
-            
             return redirect('/student/dashboard')
-        
-        return render_template('book_venue.html', error=True)
+        else:
+            # Venue is already booked
+            conn.close()
+            conn = get_db_connection()
+            venues = conn.execute('SELECT name FROM venues').fetchall()
+            previous_bookings = conn.execute('SELECT * FROM Bookings WHERE Name = ?', (session['user'],)).fetchall()
+            conn.close()
+            return render_template('book_venue.html', error="Venue already booked for the selected time.", venues=venues, previous_bookings=previous_bookings)
 
     conn = get_db_connection()
     venues = conn.execute('SELECT name FROM venues').fetchall()
@@ -176,6 +199,12 @@ def reject_booking(booking_id):
     conn.close()
     
     return redirect('/faculty/dashboard')
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    session.pop('user_type', None)
+    return redirect('/login')
 
 if __name__ == '__main__':
     app.run(debug=True)
