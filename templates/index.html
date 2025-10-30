@@ -3,7 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - College Venue Booking System</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+    <div class="welcome-section">
+        <h1>Welcome to College Venue Booking System</h1>
+        <p>Easily book halls, auditoriums, and classrooms for your club events and functions.</p>
+        
+        <div class="features">
+            <div class="feature-card">
+                <h3>For Students</h3>
+                <p>Book venues for your club activities and events</p>
+                <a href="{{ url_for('login') }}" class="btn">Login as Student</a>
+            </div>
+            
+            <div class="feature-card">
+                <h3>For Faculty</h3>
+                <p>Approve and manage venue bookings</p>
+                <a href="{{ url_for('login') }}" class="btn">Login as Faculty</a>
+            </div>
+        </div>
+    </div>
 </body>
+</html>

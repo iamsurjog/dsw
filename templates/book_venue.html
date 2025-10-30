@@ -3,7 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Venue - College Venue Booking System</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+    <h1>Book a Venue</h1>
+    <p>Submit a request to book a venue for your event.</p>
+
+    {% if error %}
+    <div class="alert alert-error">
+        The selected venue is not available for the requested time slot. Please choose a different time or venue.
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('book_venue') }}">
+        <div class="form-group">
+            <label for="event_name">Event Name</label>
+            <input type="text" id="event_name" name="event_name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="start_date">Start Date</label>
+            <input type="date" id="start_date" name="start_date" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="end_date">End Date</label>
+            <input type="date" id="end_date" name="end_date" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="start_time">Start Time</label>
+            <input type="time" id="start_time" name="start_time" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="end_time">End Time</label>
+            <input type="time" id="end_time" name="end_time" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="venue">Venue</label>
+            <select id="venue" name="venue" required>
+                <option value="">Select a Venue</option>
+                {% for venue in venues %}
+                <option value="{{ venue.name }}">{{ venue.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <button type="submit" class="btn">Submit Booking Request</button>
+    </form>
+
+    {% if previous_bookings %}
+    <div class="previous-bookings">
+        <h2>Your Previous Bookings</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Venue</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in previous_bookings %}
+                <tr>
+                    <td>{{ booking.Event_Name }}</td>
+                    <td>{{ booking.Venue }}</td>
+                    <td>{{ booking.Start_Date }}</td>
+                    <td>{{ booking.End_Date }}</td>
+                    <td>{{ booking.Start_Time }}</td>
+                    <td>{{ booking.End_Time }}</td>
+                    <td>
+                        {% if booking.Status == 'approved' %}
+                        <span class="status-approved">Approved</span>
+                        {% elif booking.Status == 'pending' %}
+                        <span class="status-pending">Pending</span>
+                        {% else %}
+                        <span class="status-rejected">Rejected</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
 </body>
+</html>

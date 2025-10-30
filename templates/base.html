@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}College Venue Booking System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">College Venue Booking</div>
+            <div class="user-info">
+                {% if session.user %}
+                    <span>Welcome, {{ session.user }}</span>
+                    <a href="{{ url_for('logout') }}" style="color: white;">Logout</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <div class="container main-layout">
+        {% if session.user_type == 'student' %}
+        <div class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('student_dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('venue_availability') }}">Venue Availability</a></li>
+                <li><a href="{{ url_for('book_venue') }}">Book Venue</a></li>
+            </ul>
+        </div>
+        {% elif session.user_type == 'faculty' %}
+        <div class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('faculty_dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('venue_availability') }}">Venue Availability</a></li>
+                <li><a href="{{ url_for('faculty_dashboard') }}">Booking Approval</a></li>
+            </ul>
+        </div>
+        {% endif %}
+
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 College Venue Booking System</p>
+        </div>
+    </footer>
+</body>
+</html>
