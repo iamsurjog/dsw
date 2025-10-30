@@ -1,0 +1,135 @@
+<h1 style="margin-bottom: 10px;">Book a Venue</h1>
+<p style="color: var(--text-light); margin-bottom: 30px;">Submit a request to book a venue for your event.</p>
+
+{% if success %}
+<div class="success-message" id="successMessage" style="display: block;">
+    ✅ Booking request submitted successfully! Your request is pending approval.
+</div>
+{% endif %}
+
+{% if error %}
+<div class="alert alert-error">
+    The selected venue is not available for the requested time slot. Please choose a different time or venue.
+</div>
+{% endif %}
+
+<form method="POST" action="/book_venue" id="bookingForm" data-ajax="true">
+    <div class="form-group">
+        <label for="event_name">Event Name</label>
+        <input type="text" id="event_name" name="event_name" required placeholder="Enter your event name">
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <div class="form-group">
+            <label for="start_date">Start Date</label>
+            <input type="date" id="start_date" name="start_date" value="{{ request.args.get('start_date', '') }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="end_date">End Date</label>
+            <input type="date" id="end_date" name="end_date" value="{{ request.args.get('end_date', '') }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="start_time">Start Time</label>
+            <input type="time" id="start_time" name="start_time" value="{{ request.args.get('start_time', '') }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="end_time">End Time</label>
+            <input type="time" id="end_time" name="end_time" value="{{ request.args.get('end_time', '') }}" required>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="venue">Venue</label>
+        <select id="venue" name="venue" required>
+            <option value="">Select a Venue</option>
+            {% for venue in venues %}
+            <option value="{{ venue.name }}" 
+                {% if request.args.get('venue') == venue.name %}selected{% endif %}>
+                {{ venue.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <button type="submit" class="btn" style="width: 100%;">
+        <span class="loading" id="loadingSpinner" style="display: none;"></span>
+        <span id="buttonText">Submit Booking Request</span>
+    </button>
+</form>
+
+{% if previous_bookings %}
+<div class="previous-bookings" style="margin-top: 40px;">
+    <h2 style="margin-bottom: 20px;">Your Previous Bookings</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Event Name</th>
+                <th>Venue</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in previous_bookings %}
+            <tr>
+                <td>{{ booking.Event_Name }}</td>
+                <td>{{ booking.Venue }}</td>
+                <td>{{ booking.Start_Date }}</td>
+                <td>{{ booking.End_Date }}</td>
+                <td>{{ booking.Start_Time }}</td>
+                <td>{{ booking.End_Time }}</td>
+                <td>
+                    {% if booking.Status == 'approved' %}
+                    <span class="status-approved">Approved</span>
+                    {% elif booking.Status == 'pending' %}
+                    <span class="status-pending">Pending</span>
+                    {% else %}
+                    <span class="status-rejected">Rejected</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<script>
+// Auto-fill form data from URL parameters and stored data
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Fill from URL parameters
+    const startDate = urlParams.get('start_date');
+    const endDate = urlParams.get('end_date');
+    const startTime = urlParams.get('start_time');
+    const endTime = urlParams.get('end_time');
+    const venue = urlParams.get('venue');
+    
+    if (startDate) document.getElementById('start_date').value = startDate;
+    if (endDate) document.getElementById('end_date').value = endDate;
+    if (startTime) document.getElementById('start_time').value = startTime;
+    if (endTime) document.getElementById('end_time').value = endTime;
+    if (venue) document.getElementById('venue').value = venue;
+    
+    // Focus on event name if other fields are pre-filled
+    const eventName = document.getElementById('event_name');
+    if (startDate && !eventName.value) {
+        eventName.focus();
+    }
+    
+    // Show success message if present
+    const successMessage = document.getElementById('successMessage');
+    if (successMessage) {
+        setTimeout(() => {
+            successMessage.style.display = 'none';
+        }, 5000);
+    }
+});
+</script>

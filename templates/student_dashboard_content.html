@@ -1,0 +1,70 @@
+<h1>Student Dashboard</h1>
+<p>Welcome, {{ session.user }}! Here you can manage your venue bookings.</p>
+
+<div class="dashboard-cards">
+    <div class="card">
+        <h3>Approved Bookings</h3>
+        {% if approved_events %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Venue</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in approved_events %}
+                <tr>
+                    <td>{{ event.Event_Name }}</td>
+                    <td>{{ event.Venue }}</td>
+                    <td>{{ event.Start_Date }}</td>
+                    <td>{{ event.End_Date }}</td>
+                    <td>{{ event.Start_Time }}</td>
+                    <td>{{ event.End_Time }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No approved bookings yet.</p>
+        {% endif %}
+    </div>
+    
+    <div class="card">
+        <h3>Pending Approvals</h3>
+        {% if pending_events %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Venue</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in pending_events %}
+                <tr>
+                    <td>{{ event.Event_Name }}</td>
+                    <td>{{ event.Venue }}</td>
+                    <td>{{ event.Start_Date }}</td>
+                    <td>{{ event.End_Date }}</td>
+                    <td>{{ event.Start_Time }}</td>
+                    <td>{{ event.End_Time }}</td>
+                    <td><span class="status-pending">Pending</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No pending bookings.</p>
+        {% endif %}
+    </div>
+</div>

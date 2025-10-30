@@ -1,0 +1,110 @@
+<h1 style="margin-bottom: 10px;">Check Venue Availability</h1>
+<p style="color: var(--text-light); margin-bottom: 30px;">Find available venues for your desired time slot and book instantly.</p>
+
+<form method="POST" action="/venue_availability" id="availabilityForm" data-ajax="true">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <div class="form-group">
+            <label for="start_date">Start Date</label>
+            <input type="date" id="start_date" name="start_date" value="{{ form_data.start_date if form_data else '' }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="end_date">End Date</label>
+            <input type="date" id="end_date" name="end_date" value="{{ form_data.end_date if form_data else '' }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="start_time">Start Time</label>
+            <input type="time" id="start_time" name="start_time" value="{{ form_data.start_time if form_data else '' }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="end_time">End Time</label>
+            <input type="time" id="end_time" name="end_time" value="{{ form_data.end_time if form_data else '' }}" required>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="venue">Venue (Optional)</label>
+        <select id="venue" name="venue">
+            <option value="all">All Venues</option>
+            {% for venue in all_venues %}
+            <option value="{{ venue.name }}" 
+                {% if form_data and form_data.venue == venue.name %}selected{% endif %}>
+                {{ venue.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <button type="submit" class="btn" style="width: 100%;">
+        <span class="loading" id="loadingSpinner" style="display: none;"></span>
+        <span id="buttonText">Check Availability</span>
+    </button>
+</form>
+
+{% if venues is defined and venues is not none %}
+<div class="results-section" id="resultsSection">
+    <h2 style="margin-bottom: 20px;">Available Venues</h2>
+    {% if venues %}
+    <table>
+        <thead>
+            <tr>
+                <th>Venue Name</th>
+                <th>Available</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for venue in venues %}
+            <tr>
+                <td>{{ venue.name }}</td>
+                <td><span class="status-approved">Available</span></td>
+                <td>
+                    <button class="btn quick-book-btn" onclick="quickBook('{{ venue.name }}')">
+                        Quick Book
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-error">
+        No venues available for the selected time slot.
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+// Auto-fill form data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Only auto-fill if no existing form data
+    if (!document.getElementById('start_date').value) {
+        const startDate = urlParams.get('start_date');
+        const endDate = urlParams.get('end_date');
+        const startTime = urlParams.get('start_time');
+        const endTime = urlParams.get('end_time');
+        const venue = urlParams.get('venue');
+        
+        if (startDate) document.getElementById('start_date').value = startDate;
+        if (endDate) document.getElementById('end_date').value = endDate;
+        if (startTime) document.getElementById('start_time').value = startTime;
+        if (endTime) document.getElementById('end_time').value = endTime;
+        if (venue) document.getElementById('venue').value = venue;
+    }
+    
+    // Restore quick book data if available
+    const quickBookData = window.formData.get('quickBook');
+    if (quickBookData) {
+        document.getElementById('start_date').value = quickBookData.start_date || '';
+        document.getElementById('end_date').value = quickBookData.end_date || '';
+        document.getElementById('start_time').value = quickBookData.start_time || '';
+        document.getElementById('end_time').value = quickBookData.end_time || '';
+        document.getElementById('venue').value = quickBookData.venue || 'all';
+    }
+});
+</script>

@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+    <div class="loading-overlay" id="globalLoading">
+        <div class="loading-spinner"></div>
+    </div>
+
     <header>
         <div class="container header-content">
             <div class="logo">College Venue Booking</div>
@@ -23,25 +27,23 @@
     </header>
 
     <div class="container main-layout">
-        {% if session.user_type == 'student' %}
+        {% if session.user_type %}
         <div class="sidebar">
             <ul>
-                <li><a href="/student/dashboard">Dashboard</a></li>
-                <li><a href="/venue_availability">Venue Availability</a></li>
-                <li><a href="/book_venue">Book Venue</a></li>
-            </ul>
-        </div>
-        {% elif session.user_type == 'faculty' %}
-        <div class="sidebar">
-            <ul>
-                <li><a href="/faculty/dashboard">Dashboard</a></li>
-                <li><a href="/venue_availability">Venue Availability</a></li>
-                <li><a href="/faculty/dashboard">Booking Approval</a></li>
+                {% if session.user_type == 'student' %}
+                    <li><a href="/student/dashboard" data-ajax="true">Dashboard</a></li>
+                    <li><a href="/venue_availability" data-ajax="true">Venue Availability</a></li>
+                    <li><a href="/book_venue" data-ajax="true">Book Venue</a></li>
+                {% elif session.user_type == 'faculty' %}
+                    <li><a href="/faculty/dashboard" data-ajax="true">Dashboard</a></li>
+                    <li><a href="/venue_availability" data-ajax="true">Venue Availability</a></li>
+                    <li><a href="/faculty/dashboard" data-ajax="true">Booking Approval</a></li>
+                {% endif %}
             </ul>
         </div>
         {% endif %}
 
-        <div class="content">
+        <div class="content" id="main-content">
             {% block content %}{% endblock %}
         </div>
     </div>
@@ -51,5 +53,178 @@
             <p>&copy; 2023 College Venue Booking System</p>
         </div>
     </footer>
+
+    <script>
+    // Simple AJAX navigation without complex state management
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle AJAX navigation
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a[data-ajax="true"]');
+            if (link) {
+                e.preventDefault();
+                const url = link.getAttribute('href');
+                showLoading();
+                fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('main-content').innerHTML = html;
+                    hideLoading();
+                    history.pushState(null, '', url);
+                })
+                .catch(error => {
+                    console.error('Error loading page:', error);
+                    hideLoading();
+                    window.location.href = url;
+                });
+            }
+        });
+
+        // Handle form submissions with AJAX
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            if (form.hasAttribute('data-ajax')) {
+                e.preventDefault();
+                showLoading();
+                const formData = new FormData(form);
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('main-content').innerHTML = html;
+                    hideLoading();
+                })
+                .catch(error => {
+                    console.error('Error submitting form:', error);
+                    hideLoading();
+                });
+            }
+        });
+
+        // Handle browser back/forward
+        window.addEventListener('popstate', function() {
+            showLoading();
+            fetch(window.location.pathname, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('main-content').innerHTML = html;
+                hideLoading();
+            })
+            .catch(error => {
+                console.error('Error loading page:', error);
+                hideLoading();
+                window.location.reload();
+            });
+        });
+    });
+
+    function showLoading() {
+        document.getElementById('globalLoading').style.display = 'flex';
+    }
+
+    function hideLoading() {
+        document.getElementById('globalLoading').style.display = 'none';
+    }
+
+    // Quick book function for venue availability
+    function quickBook(venueName) {
+        const startDate = document.getElementById('start_date')?.value;
+        const endDate = document.getElementById('end_date')?.value;
+        const startTime = document.getElementById('start_time')?.value;
+        const endTime = document.getElementById('end_time')?.value;
+        
+        if (!startDate || !endDate || !startTime || !endTime) {
+            alert('Please fill in all date and time fields first.');
+            return;
+        }
+        
+        const params = new URLSearchParams({
+            venue: venueName,
+            start_date: startDate,
+            end_date: endDate,
+            start_time: startTime,
+            end_time: endTime
+        });
+        
+        showLoading();
+        fetch(`/book_venue?${params.toString()}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('main-content').innerHTML = html;
+            hideLoading();
+            history.pushState(null, '', `/book_venue?${params.toString()}`);
+        })
+        .catch(error => {
+            console.error('Error loading page:', error);
+            hideLoading();
+            window.location.href = `/book_venue?${params.toString()}`;
+        });
+    }
+
+    // Form data persistence helper
+    function saveFormData(formId) {
+        const form = document.getElementById(formId);
+        if (form) {
+            const formData = new FormData(form);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            localStorage.setItem(`form_${formId}`, JSON.stringify(data));
+        }
+    }
+
+    function loadFormData(formId) {
+        const saved = localStorage.getItem(`form_${formId}`);
+        if (saved) {
+            const data = JSON.parse(saved);
+            const form = document.getElementById(formId);
+            if (form) {
+                Object.keys(data).forEach(key => {
+                    const element = form.querySelector(`[name="${key}"]`);
+                    if (element) {
+                        element.value = data[key];
+                    }
+                });
+            }
+        }
+    }
+
+    // Auto-save form data on input change
+    document.addEventListener('input', function(e) {
+        const form = e.target.closest('form');
+        if (form && form.id) {
+            clearTimeout(window.formSaveTimeout);
+            window.formSaveTimeout = setTimeout(() => {
+                saveFormData(form.id);
+            }, 500);
+        }
+    });
+
+    // Load saved form data on page load
+    window.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('form[id]');
+        forms.forEach(form => {
+            loadFormData(form.id);
+        });
+    });
+    </script>
 </body>
 </html>
