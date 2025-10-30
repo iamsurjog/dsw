@@ -13,7 +13,10 @@
             <div class="user-info">
                 {% if session.user %}
                     <span>Welcome, {{ session.user }}</span>
-                    <a href="{{ url_for('logout') }}" style="color: white;">Logout</a>
+                    <a href="/logout">Logout</a>
+                {% else %}
+                    <a href="/login">Login</a>
+                    <a href="/register">Register</a>
                 {% endif %}
             </div>
         </div>
@@ -23,17 +26,17 @@
         {% if session.user_type == 'student' %}
         <div class="sidebar">
             <ul>
-                <li><a href="{{ url_for('student_dashboard') }}">Dashboard</a></li>
-                <li><a href="{{ url_for('venue_availability') }}">Venue Availability</a></li>
-                <li><a href="{{ url_for('book_venue') }}">Book Venue</a></li>
+                <li><a href="/student/dashboard">Dashboard</a></li>
+                <li><a href="/venue_availability">Venue Availability</a></li>
+                <li><a href="/book_venue">Book Venue</a></li>
             </ul>
         </div>
         {% elif session.user_type == 'faculty' %}
         <div class="sidebar">
             <ul>
-                <li><a href="{{ url_for('faculty_dashboard') }}">Dashboard</a></li>
-                <li><a href="{{ url_for('venue_availability') }}">Venue Availability</a></li>
-                <li><a href="{{ url_for('faculty_dashboard') }}">Booking Approval</a></li>
+                <li><a href="/faculty/dashboard">Dashboard</a></li>
+                <li><a href="/venue_availability">Venue Availability</a></li>
+                <li><a href="/faculty/dashboard">Booking Approval</a></li>
             </ul>
         </div>
         {% endif %}

@@ -1,94 +1,87 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faculty Dashboard - College Venue Booking System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <h1>Faculty Dashboard</h1>
-    <p>Welcome, {{ session.user }}! Here you can manage venue booking approvals.</p>
+{% extends "base.html" %}
 
-    <div class="dashboard-cards">
-        <!-- Approved Bookings -->
-        <div class="card">
-            <h3>Approved Bookings</h3>
-            {% if approved_events %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Event Name</th>
-                        <th>Venue</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Requested By</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for event in approved_events %}
-                    <tr>
-                        <td>{{ event.Event_Name }}</td>
-                        <td>{{ event.Venue }}</td>
-                        <td>{{ event.Start_Date }}</td>
-                        <td>{{ event.End_Date }}</td>
-                        <td>{{ event.Start_Time }}</td>
-                        <td>{{ event.End_Time }}</td>
-                        <td>{{ event.Name }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p>No approved bookings.</p>
-            {% endif %}
-        </div>
+{% block title %}Faculty Dashboard - College Venue Booking System{% endblock %}
 
-        <!-- Pending Approvals -->
-        <div class="card">
-            <h3>Pending Approvals</h3>
-            {% if pending_events %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Event Name</th>
-                        <th>Venue</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Requested By</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for event in pending_events %}
-                    <tr>
-                        <td>{{ event.Event_Name }}</td>
-                        <td>{{ event.Venue }}</td>
-                        <td>{{ event.Start_Date }}</td>
-                        <td>{{ event.End_Date }}</td>
-                        <td>{{ event.Start_Time }}</td>
-                        <td>{{ event.End_Time }}</td>
-                        <td>{{ event.Name }}</td>
-                        <td>
-                            <form method="POST" action="{{ url_for('approve_booking', booking_id=event.Booking_ID) }}" style="display: inline;">
-                                <button type="submit" class="btn-success">Approve</button>
-                            </form>
-                            <form method="POST" action="{{ url_for('reject_booking', booking_id=event.Booking_ID) }}" style="display: inline;">
-                                <button type="submit" class="btn-danger">Reject</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p>No pending approvals.</p>
-            {% endif %}
-        </div>
+{% block content %}
+<h1>Faculty Dashboard</h1>
+<p>Welcome, {{ session.user }}! Here you can manage venue booking approvals.</p>
+
+<div class="dashboard-cards">
+    <div class="card">
+        <h3>Approved Bookings</h3>
+        {% if approved_events %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Venue</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Requested By</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in approved_events %}
+                <tr>
+                    <td>{{ event.Event_Name }}</td>
+                    <td>{{ event.Venue }}</td>
+                    <td>{{ event.Start_Date }}</td>
+                    <td>{{ event.End_Date }}</td>
+                    <td>{{ event.Start_Time }}</td>
+                    <td>{{ event.End_Time }}</td>
+                    <td>{{ event.Name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No approved bookings.</p>
+        {% endif %}
     </div>
-</body>
-</html>
+    
+    <div class="card">
+        <h3>Pending Approvals</h3>
+        {% if pending_events %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Venue</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Requested By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in pending_events %}
+                <tr>
+                    <td>{{ event.Event_Name }}</td>
+                    <td>{{ event.Venue }}</td>
+                    <td>{{ event.Start_Date }}</td>
+                    <td>{{ event.End_Date }}</td>
+                    <td>{{ event.Start_Time }}</td>
+                    <td>{{ event.End_Time }}</td>
+                    <td>{{ event.Name }}</td>
+                    <td class="form-actions">
+                        <form method="POST" action="/approve_booking/{{ event.Booking_ID }}" style="display: inline;">
+                            <button type="submit" class="btn-success">Approve</button>
+                        </form>
+                        <form method="POST" action="/reject_booking/{{ event.Booking_ID }}" style="display: inline;">
+                            <button type="submit" class="btn-danger">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No pending approvals.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Login - College Venue Booking System{% endblock %}
+{% block title %}Register - College Venue Booking System{% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <h2>Login to Venue Booking System</h2>
+<div class="register-container">
+    <h2>Register for Venue Booking System</h2>
     
-    <form method="POST" action="/login">
+    <form method="POST" action="/register">
         <div class="form-group">
-            <label for="user_type">Login As</label>
+            <label for="user_type">Register As</label>
             <select id="user_type" name="user_type" required>
                 <option value="">Select User Type</option>
                 <option value="student">Student</option>
@@ -26,11 +26,16 @@
             <input type="password" id="password" name="password" required>
         </div>
         
-        <button type="submit" class="btn">Login</button>
+        <div class="form-group">
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
+        </div>
+        
+        <button type="submit" class="btn">Register</button>
     </form>
     
     <p style="text-align: center; margin-top: 20px;">
-        Don't have an account? <a href="/register">Register here</a>
+        Already have an account? <a href="/login">Login here</a>
     </p>
 </div>
 {% endblock %}

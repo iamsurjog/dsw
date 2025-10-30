@@ -1,73 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venue Availability - College Venue Booking System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <h1>Check Venue Availability</h1>
-    <p>Find available venues for your desired time slot.</p>
+{% extends "base.html" %}
 
-    <form method="POST" action="{{ url_for('venue_availability') }}">
-        <div class="form-group">
-            <label for="start_date">Start Date</label>
-            <input type="date" id="start_date" name="start_date" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="end_date">End Date</label>
-            <input type="date" id="end_date" name="end_date" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="start_time">Start Time</label>
-            <input type="time" id="start_time" name="start_time" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="end_time">End Time</label>
-            <input type="time" id="end_time" name="end_time" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="venue">Venue (Optional)</label>
-            <select id="venue" name="venue">
-                <option value="all">All Venues</option>
-                {% for venue in venues %}
-                <option value="{{ venue.name }}">{{ venue.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        
-        <button type="submit" class="btn">Check Availability</button>
-    </form>
+{% block title %}Venue Availability - College Venue Booking System{% endblock %}
 
-    {% if venues and request.method == 'POST' %}
-    <div class="results">
-        <h2>Available Venues</h2>
-        {% if venues %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Venue Name</th>
-                    <th>Available</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for venue in venues %}
-                <tr>
-                    <td>{{ venue.name }}</td>
-                    <td><span class="status-approved">Yes</span></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p>No venues available for the selected time slot.</p>
-        {% endif %}
+{% block content %}
+<h1>Check Venue Availability</h1>
+<p>Find available venues for your desired time slot.</p>
+
+<form method="POST" action="/venue_availability">
+    <div class="form-group">
+        <label for="start_date">Start Date</label>
+        <input type="date" id="start_date" name="start_date" required>
     </div>
+    
+    <div class="form-group">
+        <label for="end_date">End Date</label>
+        <input type="date" id="end_date" name="end_date" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="start_time">Start Time</label>
+        <input type="time" id="start_time" name="start_time" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="end_time">End Time</label>
+        <input type="time" id="end_time" name="end_time" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="venue">Venue (Optional)</label>
+        <select id="venue" name="venue">
+            <option value="all">All Venues</option>
+            {% for venue in venues %}
+            <option value="{{ venue.name }}">{{ venue.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <button type="submit" class="btn">Check Availability</button>
+</form>
+
+{% if venues and request.method == 'POST' %}
+<div class="results">
+    <h2>Available Venues</h2>
+    {% if venues %}
+    <table>
+        <thead>
+            <tr>
+                <th>Venue Name</th>
+                <th>Available</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for venue in venues %}
+            <tr>
+                <td>{{ venue.name }}</td>
+                <td><span class="status-approved">Yes</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No venues available for the selected time slot.</p>
     {% endif %}
-</body>
-</html>
+</div>
+{% endif %}
+{% endblock %}
