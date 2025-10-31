@@ -12,6 +12,9 @@ def get_db_connection():
 
 @app.route("/")
 def root():
+    if "user" in session:
+        print("IN HERE")
+        return redirect("/" + session.get('user_type') + "/dashboard")
     return render_template("index.html")
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -69,6 +72,9 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if "user" in session:
+        print("IN HERE")
+        return redirect("/" + session.get('user_type') + "/dashboard")
     if request.method == 'POST':
         user_type = request.form['user_type']
         username = request.form['username']
