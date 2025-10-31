@@ -152,11 +152,12 @@ def venue_availability():
         end_time = form_data['end_time']
         venue = form_data['venue']
 
+        # FIXED: Added Status != 'rejected' to ignore rejected bookings in availability check
         query = '''
             SELECT * FROM venues 
             WHERE name NOT IN (
-                SELECT Venue FROM Bookings
-                WHERE (
+                SELECT Venue FROM Bookings 
+                WHERE Status != 'rejected' AND (
                     (Start_Date < ? AND End_Date > ?) OR
                     (Start_Date = ? AND Start_Time < ?) OR
                     (End_Date = ? AND End_Time > ?)
@@ -198,7 +199,6 @@ def venue_availability():
                          venues=None, 
                          all_venues=all_venues,
                          form_data=form_data)
-
 @app.route('/book_venue', methods=['GET', 'POST'])
 def book_venue():
     if 'user' not in session or session.get('user_type') != 'student':
@@ -213,26 +213,27 @@ def book_venue():
         event_name = request.form['event_name']
         
         conn = get_db_connection()
+        
+        # FIXED: Use the same availability check logic as venue_availability
         query = '''
             SELECT * FROM venues 
             WHERE name NOT IN (
-                SELECT Venue FROM Bookings
-                WHERE (
+                SELECT Venue FROM Bookings 
+                WHERE Status != 'rejected' AND (
                     (Start_Date < ? AND End_Date > ?) OR
                     (Start_Date = ? AND Start_Time < ?) OR
                     (End_Date = ? AND End_Time > ?)
                 )
-            )
+            ) AND name = ?
         '''
-
-        params = [end_date, start_date, start_date, end_time, end_date, start_time]
-
-        if venue != 'all':
-            query += ' AND name = ?'
-            params.append(venue)
-            
+        
+        params = [end_date, start_date, start_date, end_time, end_date, start_time, venue]
+        
         available_venues = conn.execute(query, tuple(params)).fetchall()
-        if len(available_venues) == 0:
+        
+        # FIXED: Check if the venue IS available (not when it's NOT available)
+        if len(available_venues) > 0:
+            # Venue is available - proceed with booking
             conn.execute('INSERT INTO Bookings (Venue, Start_Time, Start_Date, End_Time, End_Date, Name, Status, Event_Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                          (venue, start_time, start_date, end_time, end_date, session['user'], 'pending', event_name))
             conn.commit()
@@ -250,19 +251,22 @@ def book_venue():
                                      success=True)
             
             return redirect('/student/dashboard')
-        
-        # AJAX response for error - return only content
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            conn = get_db_connection()
-            venues = conn.execute('SELECT name FROM venues').fetchall()
-            previous_bookings = conn.execute('SELECT * FROM Bookings WHERE Name = ?', (session['user'],)).fetchall()
+        else:
+            # Venue is NOT available - show error
             conn.close()
-            return render_template('book_venue_content.html', 
-                                 venues=venues, 
-                                 previous_bookings=previous_bookings,
-                                 error=True)
-        
-        return render_template('book_venue.html', error=True)
+            
+            # AJAX response for error - return only content
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                conn = get_db_connection()
+                venues = conn.execute('SELECT name FROM venues').fetchall()
+                previous_bookings = conn.execute('SELECT * FROM Bookings WHERE Name = ?', (session['user'],)).fetchall()
+                conn.close()
+                return render_template('book_venue_content.html', 
+                                     venues=venues, 
+                                     previous_bookings=previous_bookings,
+                                     error=True)
+            
+            return render_template('book_venue.html', error=True)
 
     conn = get_db_connection()
     venues = conn.execute('SELECT name FROM venues').fetchall()

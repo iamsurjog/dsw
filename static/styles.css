@@ -743,3 +743,109 @@ footer {
     transform: translateX(10px) rotate(-45deg);
     transform-origin: left bottom;
 }
+
+/* Add these styles to your existing styles.css file */
+
+/* Table Container for Responsive Tables */
+.table-container {
+    overflow-x: auto;
+    max-width: 100%;
+    margin: 15px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Ensure tables are responsive */
+table {
+    min-width: 600px; /* Minimum width before scrolling */
+    width: 100%;
+}
+
+/* Student Dashboard Specific Styles */
+.student-dashboard-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.student-dashboard-cards .card {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+/* Faculty Dashboard Specific Styles */
+.faculty-dashboard-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.faculty-dashboard-cards .card {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+/* Better table responsiveness */
+@media (max-width: 768px) {
+    .table-container {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+    
+    th, td {
+        padding: 10px 8px;
+        font-size: 14px;
+    }
+    
+    th {
+        font-size: 13px;
+    }
+    
+    /* Reduce padding on mobile for table cells */
+    table th,
+    table td {
+        padding: 8px 6px;
+    }
+}
+
+/* Additional responsive improvements */
+@media (max-width: 480px) {
+    .content {
+        padding: 15px;
+    }
+    
+    .card {
+        padding: 20px;
+    }
+    
+    .dashboard-cards {
+        gap: 20px;
+    }
+}
+
+/* Ensure form actions don't break on mobile */
+.form-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.form-actions form {
+    margin: 0;
+}
+
+.form-actions button {
+    min-width: 80px;
+}
+
+/* Loading state improvements */
+.loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 8px;
+}
