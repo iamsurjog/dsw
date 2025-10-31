@@ -11,7 +11,7 @@ def get_db_connection():
     return conn
 
 @app.route("/")
-def hello_world():
+def root():
     return render_template("index.html")
 
 @app.route('/register', methods=['GET', 'POST'])
